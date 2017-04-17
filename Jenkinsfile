@@ -1,43 +1,49 @@
 #!groovy
 
-node('node') {
+podTemplate(label:'test-build-pod', containers: [
+    containerTemplate(name: 'alpine', image: 'alpine:latest', ttyEnabled: true, command: 'cat')
+]) 
+
+{
+
+    node('test-build-pod') {
 
 
-    currentBuild.result = "SUCCESS"
+        currentBuild.result = "SUCCESS"
 
-    try {
+        try {
 
-       stage 'Checkout'
+           stage 'Checkout'
 
-            checkout scm
+                checkout scm
 
-       stage 'Test'
+           stage 'Test'
 
-            env.NODE_ENV = "test"
+                env.NODE_ENV = "test"
 
-            print "Environment will be : ${env.NODE_ENV}"
+                print "Environment will be : ${env.NODE_ENV}"
 
 
-       stage 'Build Docker'
+           stage 'Build Docker'
 
-            echo "Building..."
+                echo "Building..."
 
-       stage 'Deploy'
+           stage 'Deploy'
 
-            echo 'Deploying...'
+                echo 'Deploying...'
 
-       stage 'Cleanup'
+           stage 'Cleanup'
+
+        }
+
+        catch (err) {
+
+            currentBuild.result = "FAILURE"
+
+            echo 'Failed'
+
+            throw err
+        }
 
     }
-
-    catch (err) {
-
-        currentBuild.result = "FAILURE"
-
-        echo 'Failed'
-
-        throw err
-    }
-
 }
-
